@@ -1,1 +1,2 @@
-sudo strace -o /dev/null python client.py
+#!/bin/bash
+sudo strace -o /dev/null /usr/bin/python /home/user/client.py
