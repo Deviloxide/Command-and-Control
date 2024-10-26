@@ -7,6 +7,7 @@ PORT = 1234
 BUFFER = 4096
 SEP = "<sep>"
 error_outputs = ["Invalid command", "No such file or directory"]
+exit_inputs = ['exit', 'quit', 'q', 'close', 'shutdown', 'bye', 'goodbye']
 
 def shell():
     while True:
@@ -29,7 +30,7 @@ def shell():
                     output = str(exception)
                 except IndexError:
                     output = error_outputs[1]
-            elif command.lower() in ['exit', 'quit', 'q', 'close', 'shutdown', 'bye', 'goodbye']:
+            elif command.lower() in exit_inputs:
                 client_socket.close()
                 break
             else:
