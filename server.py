@@ -2,6 +2,8 @@ import socket
 import sys
 import configparser
 import os
+import hmac
+import hashlib
 
 config_path = os.path.join(os.path.expanduser('~'), 'Desktop', 'config.ini')
 config = configparser.ConfigParser()
