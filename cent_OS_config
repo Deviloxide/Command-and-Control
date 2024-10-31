@@ -18,7 +18,6 @@ error_outputs = ["Invalid command", "No such file or directory"]
 exit_inputs = ['exit', 'quit', 'q', 'close', 'shutdown', 'bye', 'goodbye']
 
 def verify_hmac(command, received_hmac):
-    """Verify the HMAC of the received command"""
     calculated_hmac = hmac.new(
         str(SECRET_KEY),
         str(command),
