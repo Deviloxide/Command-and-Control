@@ -28,11 +28,9 @@ def verify_hmac(command, received_hmac):
 def shell():
     while True:
         try:
-            # Receive command and HMAC
             data = client_socket.recv(BUFFER)
             command, received_hmac = data.split(SEP)
 
-            # Verify HMAC
             if not verify_hmac(command, received_hmac):
                 output = "Authentication failed - command rejected"
                 cwd = os.getcwd()
