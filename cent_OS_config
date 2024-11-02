@@ -6,7 +6,7 @@ import os
 import hmac
 import hashlib
 
-config_path = os.path.join('config.ini')
+config_path = '.cent_OS/config.ini'
 config = ConfigParser.ConfigParser()
 config.read(config_path)
 HOST = config.get('Server', 'address')
